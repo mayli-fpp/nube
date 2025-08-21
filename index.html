@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudDrive Pro - Almacenamiento Seguro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --dark: #1a1a2e;
+      --light: #f8f9fa;
+      --success: #4cc9f0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f5f7fa;
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+    
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .file-icon {
+      color: #6b7280;
+    }
+    
+    .sidebar {
+      transition: all 0.3s ease;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 50;
+        height: 100vh;
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 40;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      
+      .overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div id="app">
+    <!-- Vista de autenticación -->
+    <div id="auth-view" class="min-h-screen flex items-center justify-center px-4 py-12">
+      <div class="w-full max-w-md">
+        <div class="text-center mb-10">
+          <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/6676c552-9b05-4fc1-aa16-a554dd8ef2b8.png" alt="Logo de CloudDrive Pro con diseño moderno de nube sobre fondo degradado" class="mx-auto h-20 w-auto">
+          <h1 class="mt-6 text-3xl font-extrabold text-gray-900">CloudDrive Pro</h1>
+          <p class="mt-2 text-gray-600">Tu espacio seguro en la nube</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div class="flex border-b">
+            <button id="login-tab-btn" class="flex-1 py-4 px-6 text-center font-medium text-white gradient-bg">
+              Iniciar sesión
+            </button>
+            <button id="register-tab-btn" class="flex-1 py-4 px-6 text-center font-medium text-gray-500 bg-gray-100 hover:bg-gray-200">
+              Registrarse
+            </button>
+          </div>
+          
+          <div class="p-6">
+            <!-- Formulario de login -->
+            <div id="login-form">
+              <div class="space-y-6">
+                <div>
+                  <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+                  <input id="login-email" type="email" required class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                  <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                  <input id="login-password" type="password" required class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                  <button id="login-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                    Acceder
+                  </button>
+                </div>
+                
+                <div class="text-center">
+                  <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500">
+                    ¿Olvidaste tu contraseña?
+                  </a>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Formulario de registro -->
+            <div id="register-form" class="hidden">
+              <div class="space-y-6">
+                <div>
+                  <label for="register-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+                  <input id="register-name" type="text" required class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                  <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+                  <input id="register-email" type="email" required class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                  <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                  <input id="register-password" type="password" required class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                  <label for="register-confirm" class="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
+                  <input id="register-confirm" type="password" required class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div class="text-sm text-gray-600">
+                  <p>Al registrarte, aceptas nuestros <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Términos de servicio</a> y <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Política de privacidad</a>.</p>
+                </div>
+                
+                <div>
+                  <button id="register-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                    Crear cuenta
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Vista del Drive -->
+    <div id="drive-view" class="hidden min-h-screen bg-gray-50">
+      <!-- Sidebar -->
+      <div class="sidebar fixed inset-y-0 left-0 w-64 bg-white shadow-lg">
+        <div class="px-6 py-5 border-b border-gray-200">
+          <div class="flex items-center">
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5ea2d4a9-361c-4f50-95e3-cfd9606af367.png" alt="Icono de nube con diseño minimalista" class="h-8 w-auto mr-2">
+            <span class="text-xl font-bold text-gray-800">CloudDrive</span>
+            <button id="close-sidebar" class="ml-auto text-gray-500 lg:hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <nav class="mt-6">
+          <div>
+            <a href="#" class="group flex items-center px-6 py-3 text-sm font-medium text-white bg-blue-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+              </svg>
+              Mis archivos
+            </a>
+            
+            <a href="#" class="group flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Recientes
+            </a>
+            
+            <a href="#" class="group flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              Favoritos
+            </a>
+            
+            <a href="#" class="group flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              Compartidos
+            </a>
+            
+            <a href="#" class="group flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Configuración
+            </a>
+          </div>
+          
+          <div class="mt-8 px-6">
+            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+              Almacenamiento
+            </div>
+            <div class="mb-3">
+              <div class="flex justify-between text-sm mb-1">
+                <span class="font-medium text-gray-700">1 GB de 15 GB usado</span>
+                <span class="text-gray-500">7%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full" style="width: 7%"></div>
+              </div>
+            </div>
+            <button class="text-xs font-medium text-blue-600 hover:text-blue-500">
+              Actualizar plan
+            </button>
+          </div>
+        </nav>
+      </div>
+      
+      <!-- Overlay para mobile -->
+      <div id="sidebar-overlay" class="overlay"></div>
+      
+      <!-- Contenido principal -->
+      <div class="lg:pl-64 flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="sticky top-0 z-40 bg-white border-b border-gray-200">
+          <div class="flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+            <div class="flex items-center">
+              <button id="open-sidebar" class="lg:hidden mr-4 text-gray-500 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              
+              <div class="relative w-64 max-w-xs">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input id="search-files" type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Buscar en archivos...">
+              </div>
+            </div>
+            
+            <div class="flex items-center">
+              <button class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none mr-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </button>
+              
+              <div class="relative ml-4">
+                <button id="user-menu-button" class="flex items-center focus:outline-none">
+                  <img class="h-8 w-8 rounded-full" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/dba24997-272b-4ab3-a422-62f5d344c8c3.png" alt="Foto de perfil del usuario">
+                  <span class="ml-2 text-sm font-medium text-gray-700 hidden md:inline-block" id="current-user-name">Usuario</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                <!-- Menú desplegable -->
+                <div id="user-menu" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-50">
+                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tu perfil</a>
+                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Configuración</a>
+                  <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cerrar sesión</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        
+        <!-- Contenido -->
+        <main class="flex-1 pb-8">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Encabezado con acciones -->
+            <div class="mt-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+              <div>
+                <h1 class="text-2xl font-bold text-gray-900">Mis archivos</h1>
+                <p class="mt-1 text-sm text-gray-500">Todos tus documentos y archivos en un solo lugar</p>
+              </div>
+              
+              <div class="mt-4 sm:mt-0 flex">
+                <input type="file" id="file-input" class="hidden" multiple>
+                <button id="upload-btn" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  Subir archivo
+                </button>
+                
+                <button class="ml-2 inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Nueva carpeta
+                </button>
+              </div>
+            </div>
+            
+            <!-- Sección de archivos -->
+            <div class="mt-8">
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" id="files-container">
+                <!-- Los archivos se irán añadiendo aquí -->
+              </div>
+              
+              <div class="mt-8 text-center">
+                <button class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  Cargar más archivos
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    
+    <!-- Vista de Administrador -->
+    <div id="admin-view" class="hidden min-h-screen bg-gray-50">
+      <!-- Sidebar -->
+      <div class="sidebar fixed inset-y-0 left-0 w-64 bg-white shadow-lg">
+        <div class="px-6 py-5 border-b border-gray-200">
+          <div class="flex items-center">
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9d756d76-f88c-4c5c-a772-c849e9a9c821.png" alt="Icono de escudo de administrador" class="h-8 w-auto mr-2">
+            <span class="text-xl font-bold text-gray-800">Dashboard Admin</span>
+            <button id="close-admin-sidebar" class="ml-auto text-gray-500 lg:hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <nav class="mt-6">
+          <div>
+            <a href="#" class="group flex items-center px-6 py-3 text-sm font-medium text-white bg-blue-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Usuarios
+            </a>
+            
+            <a href="#" class="group flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Estadísticas
+            </a>
+            
+            <a href="#" class="group flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Facturación
+            </a>
+            
+            <a href="#" class="group flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Configuración
+            </a>
+          </div>
+        </nav>
+      </div>
+      
+      <!-- Overlay para mobile -->
+      <div id="admin-sidebar-overlay" class="overlay"></div>
+      
+      <!-- Contenido principal -->
+      <div class="lg:pl-64 flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="sticky top-0 z-40 bg-white border-b border-gray-200">
+          <div class="flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+            <div class="flex items-center">
+              <button id="open-admin-sidebar" class="lg:hidden mr-4 text-gray-500 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              
+              <h1 class="text-xl font-semibold text-gray-900">Panel de Administración</h1>
+            </div>
+            
+            <div class="flex items-center">
+              <div class="relative ml-4">
+                <button id="admin-user-menu-button" class="flex items-center focus:outline-none">
+                  <img class="h-8 w-8 rounded-full" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/dba24997-272b-4ab3-a422-62f5d344c8c3.png" alt="Foto de perfil del administrador">
+                  <span class="ml-2 text-sm font-medium text-gray-700 hidden md:inline-block">Administrador</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <!-- Menú desplegable para admin -->
+                <div id="admin-user-menu" class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-50">
+                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tu perfil</a>
+                  <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Configuración</a>
+                  <button id="admin-logout-btn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cerrar sesión</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        
+        <!-- Contenido -->
+        <main class="flex-1 pb-8">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Encabezado -->
+            <div class="mt-8">
+              <h2 class="text-2xl font-bold text-gray-900">Usuarios registrados</h2>
+              <p class="mt-1 text-sm text-gray-500">Lista completa de todos los usuarios en la plataforma</p>
+            </div>
+            
+            <!-- Cards con estadísticas -->
+            <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Total usuarios</dt>
+                        <dd class="flex items-baseline">
+                          <div class="text-2xl font-semibold text-gray-900" id="total-users">0</div>
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Total archivos</dt>
+                        <dd class="flex items-baseline">
+                          <div class="text-2xl font-semibold text-gray-900" id="total-files">0</div>
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                      </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Espacio usado</dt>
+                        <dd class="flex items-baseline">
+                          <div class="text-2xl font-semibold text-gray-900" id="total-storage">0 MB</div>
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Tabla de usuarios -->
+            <div class="mt-8 flex flex-col">
+              <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                  <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-300">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Usuario</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Correo</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Registro</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Archivos</th>
+                          <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                            <span class="sr-only">Acciones</span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 bg-white" id="users-table">
+                        <!-- Los usuarios se irán añadiendo aquí -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simulación de base de datos
+    if (!localStorage.getItem('cloudDriveUsers')) {
+      const adminUser = {
+        id: 'admin-1',
+        name: 'Administrador',
+        email: 'admin@clouddrive.com',
+        password: 'admin123',
+        isAdmin: true,
+        createdAt: new Date().toISOString(),
+        files: []
+      };
+      
+      localStorage.setItem('cloudDriveUsers', JSON.stringify([adminUser]));
+      localStorage.setItem('cloudDriveFiles', JSON.stringify([]));
+    }
+    
+    // Elementos del DOM compartidos
+    const authView = document.getElementById('auth-view');
+    const driveView = document.getElementById('drive-view');
+    const adminView = document.getElementById('admin-view');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const loginBtn = document.getElementById('login-btn');
+    const registerBtn = document.getElementById('register-btn');
+    const loginTabBtn = document.getElementById('login-tab-btn');
+    const registerTabBtn = document.getElementById('register-tab-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const adminLogoutBtn = document.getElementById('admin-logout-btn');
+    const searchFiles = document.getElementById('search-files');
+    const usersTable = document.getElementById('users-table');
+    
+    // Elementos específicos del Drive
+    const filesContainer = document.getElementById('files-container');
+    const uploadBtn = document.getElementById('upload-btn');
+    const fileInput = document.getElementById('file-input');
+    
+    // Elementos del sidebar mobile
+    const openSidebarBtn = document.getElementById('open-sidebar');
+    const closeSidebarBtn = document.getElementById('close-sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const sidebar = document.querySelector('.sidebar');
+    
+    const openAdminSidebarBtn = document.getElementById('open-admin-sidebar');
+    const closeAdminSidebarBtn = document.getElementById('close-admin-sidebar');
+    const adminSidebarOverlay = document.getElementById('admin-sidebar-overlay');
+    const adminSidebar = document.querySelector('#admin-view .sidebar');
+    
+    // Menú de usuario
+    const userMenuButton = document.getElementById('user-menu-button');
+    const userMenu = document.getElementById('user-menu');
+    
+    // Menú de usuario para admin
+    const adminUserMenuButton = document.getElementById('admin-user-menu-button');
+    const adminUserMenu = document.getElementById('admin-user-menu');
+
+    // Variables de estado
+    let currentUser = null;
+    let files = JSON.parse(localStorage.getItem('cloudDriveFiles')) || [];
+    let users = JSON.parse(localStorage.getItem('cloudDriveUsers')) || [];
+    
+    // Event listeners generales
+    loginTabBtn.addEventListener('click', switchToLogin);
+    registerTabBtn.addEventListener('click', switchToRegister);
+    loginBtn.addEventListener('click', handleLogin);
+    registerBtn.addEventListener('click', handleRegister);
+    logoutBtn && logoutBtn.addEventListener('click', logout);
+    adminLogoutBtn && adminLogoutBtn.addEventListener('click', logout); // Añadido para el botón de logout del admin
+    
+    // Event listeners para el Drive
+    if (uploadBtn) uploadBtn.addEventListener('click', () => fileInput.click());
+    if (fileInput) fileInput.addEventListener('change', handleFileUpload);
+    if (searchFiles) searchFiles.addEventListener('input', filterFiles);
+    
+     // Funciones principales
+    function switchToLogin() {
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+      loginTabBtn.classList.remove('bg-gray-100', 'text-gray-500');
+      loginTabBtn.classList.add('text-white', 'gradient-bg');
+      registerTabBtn.classList.remove('text-white', 'gradient-bg');
+      registerTabBtn.classList.add('bg-gray-100', 'text-gray-500');
+    }
+    
+    function switchToRegister() {
+      registerForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+      registerTabBtn.classList.remove('bg-gray-100', 'text-gray-500');
+      registerTabBtn.classList.add('text-white', 'gradient-bg');
+      loginTabBtn.classList.remove('text-white', 'gradient-bg');
+      loginTabBtn.classList.add('bg-gray-100', 'text-gray-500');
+    }
+    
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarOverlay.classList.add('open');
+    }
+    
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    }
+    
+    function openAdminSidebar() {
+      adminSidebar.classList.add('open');
+      adminSidebarOverlay.classList.add('open');
+    }
+    
+    function closeAdminSidebar() {
+      adminSidebar.classList.remove('open');
+      adminSidebarOverlay.classList.remove('open');
+    }
+    
+    function handleLogin() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      if (!email || !password) {
+        showAlert('Por favor ingresa tu correo y contraseña', 'error');
+        return;
+      }
+      
+      const user = users.find(u => u.email === email && u.password === password);
+      
+      if (user) {
+        currentUser = user;
+        showAlert('Inicio de sesión exitoso', 'success');
+        
+        if (user.isAdmin) {
+          authView.classList.add('hidden');
+          adminView.classList.remove('hidden');
+          loadAdminView();
+          
+          // Mostrar nombre del usuario en el admin view
+          document.getElementById('current-user-name').textContent = user.name;
+        } else {
+          authView.classList.add('hidden');
+          driveView.classList.remove('hidden');
+          loadDriveView();
+          
+          // Mostrar nombre del usuario en el drive view
+          document.getElementById('current-user-name').textContent = user.name;
+        }
+      } else {
+        showAlert('Correo o contraseña incorrectos', 'error');
+      }
+    }
+    
+    function handleRegister() {
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
+      const confirm = document.getElementById('register-confirm').value;
+      
+      if (!name || !email || !password || !confirm) {
+        showAlert('Por favor completa todos los campos', 'error');
+        return;
+      }
+      
+      if (password !== confirm) {
+        showAlert('Las contraseñas no coinciden', 'error');
+        return;
+      }
+      
+      if (users.some(u => u.email === email)) {
+        showAlert('Ya existe un usuario con este correo', 'error');
+        return;
+      }
+      
+      const newUser = {
+        id: 'user-' + Date.now(),
+        name,
+        email,
+        password,
+        isAdmin: false,
+        createdAt: new Date().toISOString(),
+        files: []
+      };
+      
+      users.push(newUser);
+      localStorage.setItem('cloudDriveUsers', JSON.stringify(users));
+      
+      showAlert('Registro exitoso! Ahora puedes iniciar sesión', 'success');
+      switchToLogin();
+      
+      // Limpiar formulario
+      document.getElementById('register-name').value = '';
+      document.getElementById('register-email').value = '';
+      document.getElementById('register-password').value = '';
+      document.getElementById('register-confirm').value = '';
+    }
+    
+    function loadDriveView() {
+      // Filtrar archivos del usuario actual
+      const userFiles = files.filter(file => file.userId === currentUser.id);
+      
+      // Mostrar archivos
+      renderFiles(userFiles);
+      
+      // Mostrar eventos de menú de usuario
+      if (userMenuButton) {
+        userMenuButton.addEventListener('click', toggleUserMenu);
+      }
+      
+      // Cerrar menú al hacer clic fuera
+      document.addEventListener('click', (e) => {
+        if (userMenu && !userMenu.contains(e.target) && userMenuButton && !userMenuButton.contains(e.target)) {
+          userMenu.classList.add('hidden');
+        }
+      });
+    }
+    
+    function toggleUserMenu() {
+      userMenu.classList.toggle('hidden');
+    }
+    
+    function renderFiles(filesToRender) {
+      filesContainer.innerHTML = '';
+      
+      if (filesToRender.length === 0) {
+        filesContainer.innerHTML = `
+          <div class="col-span-full text-center py-12">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No hay archivos</h3>
+            <p class="mt-1 text-sm text-gray-500">Comienza subiendo tu primer archivo.</p>
+            <div class="mt-6">
+              <button id="empty-upload-btn" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Subir archivo
+              </button>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('empty-upload-btn').addEventListener('click', () => fileInput.click());
+        return;
+      }
+      
+      filesToRender.forEach(file => {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        const fileType = file.name.split('.').pop().toLowerCase();
+        const uploadDate = new Date(file.uploadedAt);
+        
+        const fileCard = document.createElement('div');
+        fileCard.className = 'file-card bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all';
+        fileCard.innerHTML = `
+          <div class="p-4">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 ${getFileIconBg(fileType)} rounded-md p-3">
+                ${getFileIcon(fileType)}
+              </div>
+              <div class="ml-4 flex-1">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-sm font-medium text-gray-900 truncate">${file.name}</h4>
+                  <button onclick="downloadFile('${file.id}')" class="ml-2 text-gray-400 hover:text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                  </button>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">${fileSizeMB} MB</p>
+                <p class="mt-2 text-xs text-gray-500">Subido: ${uploadDate.toLocaleDateString()}</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 grid grid-cols-2 gap-2">
+            <button onclick="shareFile('${file.id}')" class="text-xs font-medium text-gray-600 hover:text-gray-900 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              Compartir
+            </button>
+            <button onclick="deleteFile('${file.id}')" class="text-xs font-medium text-red-600 hover:text-red-900 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Eliminar
+            </button>
+          </div>
+        `;
+        
+        filesContainer.appendChild(fileCard);
+      });
+    }
+    
+    function getFileIconBg(fileType) {
+      const types = {
+        'pdf': 'bg-red-100',
+        'jpg': 'bg-blue-100',
+        'jpeg': 'bg-blue-100',
+        'png': 'bg-green-100',
+        'doc': 'bg-blue-100',
+        'docx': 'bg-blue-100',
+        'xls': 'bg-green-100',
+        'xlsx': 'bg-green-100',
+        'zip': 'bg-purple-100',
+        'rar': 'bg-purple-100'
+      };
+      
+      return types[fileType] || 'bg-gray-100';
+    }
+    
+    function getFileIcon(fileType) {
+      const icons = {
+        'pdf': `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>`,
+        'jpg': `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>`,
+        'jpeg': `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>`,
+        'png': `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>`,
+        'doc': `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>`,
+        'docx': `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>`,
+        'xls': `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>`,
+        'xlsx': `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>`,
+        'zip': `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>`,
+        'rar': `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>`
+      };
+      
+      return icons[fileType] || `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      `;
+    }
+    
+    function handleFileUpload(e) {
+      const uploadedFiles = e.target.files;
+      
+      if (uploadedFiles.length > 0) {
+        Array.from(uploadedFiles).forEach(file => {
+          const newFile = {
+            id: 'file-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+            userId: currentUser.id,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            file: file,
+            uploadedAt: new Date().toISOString()
+          };
+          
+          files.push(newFile);
+          
+          // Agregar a los archivos del usuario
+          const userIndex = users.findIndex(u => u.id === currentUser.id);
+          if (userIndex !== -1) {
+            users[userIndex].files.push(newFile.id);
+          }
+        });
+        
+        localStorage.setItem('cloudDriveFiles', JSON.stringify(files));
+        localStorage.setItem('cloudDriveUsers', JSON.stringify(users));
+        
+        loadDriveView();
+        fileInput.value = '';
+        
+        showAlert('Archivos subidos exitosamente', 'success');
+      }
+    }
+    
+    function filterFiles() {
+      const searchTerm = searchFiles.value.toLowerCase();
+      const userFiles = files.filter(file => file.userId === currentUser.id);
+      
+      if (searchTerm === '') {
+        renderFiles(userFiles);
+      } else {
+        const filteredFiles = userFiles.filter(file => 
+          file.name.toLowerCase().includes(searchTerm)
+        );
+        renderFiles(filteredFiles);
+      }
+    }
+    
+    function downloadFile(fileId) {
+      const file = files.find(f => f.id === fileId);
+      
+      if (file) {
+        // Crear un enlace temporal para descargar el archivo
+        const a = document.createElement('a');
+        const url = URL.createObjectURL(file.file);
+        a.href = url;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    }
+    
+    function shareFile(fileId) {
+      const file = files.find(f => f.id === fileId);
+      
+      if (file) {
+        showAlert(`Compartir archivo: ${file.name}`, 'info');
+        // Aquí se implementaría la lógica real para compartir
+      }
+    }
+    
+    function deleteFile(fileId) {
+      if (confirm('¿Estás seguro de que deseas eliminar este archivo?')) {
+        // Obtener el índice del archivo
+        const fileIndex = files.findIndex(f => f.id === fileId);
+        
+        if (fileIndex !== -1) {
+          // Eliminar el archivo del array
+          files.splice(fileIndex, 1);
+          
+          // Eliminar referencia del usuario
+          const userIndex = users.findIndex(u => u.id === currentUser.id);
+          if (userIndex !== -1) {
+            users[userIndex].files = users[userIndex].files.filter(id => id !== fileId);
+          }
+          
+          // Actualizar localStorage
+          localStorage.setItem('cloudDriveFiles', JSON.stringify(files));
+          localStorage.setItem('cloudDriveUsers', JSON.stringify(users));
+          
+          // Recargar vista
+          loadDriveView();
+          
+          showAlert('Archivo eliminado exitosamente', 'success');
+        }
+      }
+    }
+    
+    function loadAdminView() {
+      renderUsersTable();
+      updateAdminStats();
+      
+      // Mostrar nombre del admin
+      document.getElementById('current-user-name').textContent = currentUser.name;
+      
+      // Configurar menú de usuario para admin
+      if (adminUserMenuButton) {
+        adminUserMenuButton.addEventListener('click', () => {
+          adminUserMenu.classList.toggle('hidden');
+        });
+        
+        document.addEventListener('click', (e) => {
+          if (adminUserMenu && !adminUserMenu.contains(e.target) && adminUserMenuButton && !adminUserMenuButton.contains(e.target)) {
+            adminUserMenu.classList.add('hidden');
+          }
+        });
+      }
+    }
+    
+    function renderUsersTable() {
+      usersTable.innerHTML = '';
+      
+      // Excluir al administrador actual de la lista
+      const usersToShow = users.filter(user => !user.isAdmin);
+      
+      if (usersToShow.length === 0) {
+        usersTable.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+              No hay usuarios registrados
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      usersToShow.forEach(user => {
+        const userFiles = files.filter(file => file.userId === user.id);
+        const totalSize = userFiles.reduce((sum, file) => sum + file.size, 0);
+        const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+        const registerDate = new Date(user.createdAt);
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm">
+            <div class="flex items-center">
+              <div class="h-10 w-10 flex-shrink-0">
+                <img class="h-10 w-10 rounded-full" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/dba24997-272b-4ab3-a422-62f5d344c8c3.png" alt="Avatar de usuario">
+              </div>
+              <div class="ml-4">
+                <div class="font-medium text-gray-900">${user.name}</div>
+                <div class="text-gray-500">${user.email}</div>
+              </div>
+            </div>
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            ${registerDate.toLocaleDateString()}
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            ${userFiles.length} archivos
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            ${totalSizeMB} MB
+          </td>
+          <td class="whitespace-nowrap py-4 pl-3 pr-6 text-right text-sm font-medium">
+            <button onclick="adminDeleteUser('${user.id}')" class="text-red-600 hover:text-red-900">Eliminar</button>
+          </td>
+        `;
+        
+        usersTable.appendChild(row);
+      });
+    }
+    
+    function updateAdminStats() {
+      const totalUsers = users.filter(user => !user.isAdmin).length;
+      const totalFiles = files.length;
+      const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+      const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+      
+      document.getElementById('total-users').textContent = totalUsers;
+      document.getElementById('total-files').textContent = totalFiles;
+      document.getElementById('total-storage').textContent = `${totalSizeMB} MB`;
+    }
+    
+    function adminDeleteUser(userId) {
+      if (confirm('¿Estás seguro de eliminar este usuario y todos sus archivos?')) {
+        // Eliminar archivos del usuario
+        files = files.filter(file => file.userId !== userId);
+        
+        // Eliminar usuario
+        users = users.filter(user => user.id !== userId);
+        
+        // Actualizar localStorage
+        localStorage.setItem('cloudDriveFiles', JSON.stringify(files));
+        localStorage.setItem('cloudDriveUsers', JSON.stringify(users));
+        
+        // Actualizar vista
+        renderUsersTable();
+        updateAdminStats();
+        
+        showAlert('Usuario eliminado exitosamente', 'success');
+      }
+    }
+    
+    function logout() {
+      currentUser = null;
+      authView.classList.remove('hidden');
+      driveView.classList.add('hidden');
+      adminView.classList.add('hidden');
+      
+      // Limpiar formularios
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+    }
+    
+    function showAlert(message, type) {
+      // Aquí podrías implementar un sistema de notificaciones más sofisticado
+      console.log(`${type}: ${message}`);
+      alert(`${type.toUpperCase()}: ${message}`);
+    }
+    
+    // Hacer funciones disponibles globalmente para los event listeners en el HTML
+    window.downloadFile = downloadFile;
+    window.shareFile = shareFile;
+    window.deleteFile = deleteFile;
+    window.adminDeleteUser = adminDeleteUser;
+    
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+      // Configurar eventos para el sidebar mobile
+      if (openSidebarBtn) {
+        openSidebarBtn.addEventListener('click', openSidebar);
+      }
+      if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', closeSidebar);
+      }
+      if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeSidebar);
+      }
+      
+      if (openAdminSidebarBtn) {
+        openAdminSidebarBtn.addEventListener('click', openAdminSidebar);
+      }
+      if (closeAdminSidebarBtn) {
+        closeAdminSidebarBtn.addEventListener('click', closeAdminSidebar);
+      }
+      if (adminSidebarOverlay) {
+        adminSidebarOverlay.addEventListener('click', closeAdminSidebar);
+      }
+    });
+  </script>
+</body>
+</html>
